@@ -15,6 +15,9 @@ import {
   UploadCloud,
 } from "lucide-react";
 
+import { generateTemplate1ImageClient } from "@/template_1_client";
+import { TEMPLATE_1_URLS } from "@/template_1_urls";
+
 type Status = "idle" | "generating" | "ready" | "error";
 
 const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/webp"];
@@ -97,24 +100,20 @@ export default function Home() {
     setStatus("generating");
     setMessage("");
 
-    const formData = new FormData();
-    formData.append("profile", profile);
-    formData.append("phoneNumber", phoneNumber.trim());
-    formData.append("email", email.trim());
-
     try {
-      const response = await fetch("/api/generate", { method: "POST", body: formData });
-      if (!response.ok) {
-        const error = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(error?.error || "The poster could not be generated.");
-      }
-
-      const blob = await response.blob();
+      const blob = await generateTemplate1ImageClient({
+        profileImage: profile,
+        phoneNumber: phoneNumber.trim(),
+        email: email.trim(),
+        onModelProgress: (percent) => {
+          setMessage(`Loading the local AI model… ${percent}%`);
+        },
+      });
       if (resultPreview) URL.revokeObjectURL(resultPreview);
       const resultUrl = URL.createObjectURL(blob);
       setResultPreview(resultUrl);
       setStatus("ready");
-      setMessage("Your poster is ready and has been downloaded.");
+      setMessage("Your poster was created privately in your browser and downloaded.");
       downloadResult(resultUrl);
     } catch (error) {
       setStatus("error");
@@ -132,7 +131,7 @@ export default function Home() {
           <span className="brand-mark"><Sparkles size={18} strokeWidth={2.4} /></span>
           <span>InsureBuddy <strong>Studio</strong></span>
         </a>
-        <span className="header-note"><span className="status-dot" /> Secure, private generation</span>
+        <span className="header-note"><span className="status-dot" /> Private, in-browser generation</span>
       </header>
 
       <section className="hero" id="top">
@@ -243,7 +242,7 @@ export default function Home() {
             <AnimatePresence mode="wait">
               <motion.div className="poster-frame" key={resultPreview ? "result" : "template"} initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.3 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={resultPreview || "/api/template"} alt={resultPreview ? "Generated poster" : "Poster template preview"} />
+                <img src={resultPreview || TEMPLATE_1_URLS.template} alt={resultPreview ? "Generated poster" : "Poster template preview"} />
                 {status === "generating" && <div className="generating-overlay"><span className="scan-line" /><LoaderCircle className="spin" size={28} /><strong>Creating your poster</strong><span>Removing the background and aligning your photo…</span></div>}
               </motion.div>
             </AnimatePresence>
@@ -260,7 +259,7 @@ export default function Home() {
         </motion.aside>
       </section>
 
-      <footer><span>InsureBuddy Studio</span><span>Photos are processed locally on the generation server.</span></footer>
+      <footer><span>InsureBuddy Studio</span><span>Photos are processed locally in your browser.</span></footer>
     </main>
   );
 }
