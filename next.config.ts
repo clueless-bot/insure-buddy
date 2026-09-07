@@ -1,9 +1,14 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  output: 'export',
-  // optional, only if you're not using next/image's default loader
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  output: "export",
   images: {
     unoptimized: true,
   },
-}
+  experimental: {
+    useTypeScriptCli: false,
+  },
+};
+
+export default nextConfig;
  

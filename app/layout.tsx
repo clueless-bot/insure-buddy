@@ -20,8 +20,8 @@ const dmSans = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "InsureBuddy Poster Studio",
-  description: "Create polished, ready-to-share POSP onboarding posters.",
+  title: "Dynamic Poster Studio",
+  description: "Generate personalized poster batches from your templates and contact CSV entirely in the browser.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
